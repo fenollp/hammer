@@ -43,11 +43,12 @@ defmodule Hammer.Application do
 
   def start(_type, _args) do
     config =
-      Application.get_env(
-        :hammer,
-        :backend,
-        {Hammer.Backend.ETS, []}
-      )
+      case Application.get_env(:hammer, :backend) do
+        config = {_backend_module, _config} -> config
+        nil ->
+          {Hammer.Utils.get_env(:hammer, :backend_module, Hammer.Backend.ETS),
+           Hammer.Utils.get_env(:hammer, :backend_config, [])}
+      end
 
     Hammer.Supervisor.start_link(config, name: Hammer.Supervisor)
   end
